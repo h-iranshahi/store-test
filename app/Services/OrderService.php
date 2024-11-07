@@ -11,6 +11,9 @@ class OrderService
 {
     protected $orderRepository;
     protected $productRepository;
+    
+    protected $orderUserId;
+    protected $orderItems = [];
 
     public function __construct(OrderRepository $orderRepository, ProductRepository $productRepository)
     {
@@ -19,44 +22,47 @@ class OrderService
 
     }
 
-    public function createOrder($userId, array $productData = []): Order
+
+    public function startOrder($user)
     {
+        $this->orderUserId = $user->id;
 
-        try {
+        return $this;
+    }
 
-            $order = $this->orderRepository->create([
-                'user_id' => $userId,
-                'total_amount' => 0,  
-            ]);
-       
-            DB::beginTransaction();
+    public function addItemToOrder(int $productId, int $quantity)
+    {
+        $product = $this->productRepository->find($productId);
 
-            $totalAmount = 0;
-
-            foreach ($productData as $data) {
-                $product = $this->productRepository->find($data['product_id']);
-                $quantity = $data['quantity'];
-                $priceForThisProduct = $product->price * $quantity;
-
-                // Attach the product with quantity to the order
-                $order->items()->attach($product->id, ['quantity' => $quantity]);
-
-                // Accumulate total price
-                $totalAmount += $priceForThisProduct;
-            }
-
-            $order->total_amount = $totalAmount;
-
-
-            $this->orderRepository->update($order->id, ['total_amount' => $totalAmount]);
-
-            DB::commit();
-
-            return $order;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;  // Log or handle the exception as needed
+        if (!$this->orderUserId) {
+            throw new \Exception('No order started.');
         }
+
+        if (!$product) {
+            throw new \InvalidArgumentException('Product not found.');
+        }
+
+        if ($quantity <= 0) {
+            throw new \InvalidArgumentException('Quantity must be greater than zero.');
+        }
+
+        // Add item to order items list
+        $this->orderItems[] = [
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+            'price' => $product->price,
+        ];
+
+        return $this;
+    }
+
+    public function finalizeOrder()
+    {
+        if (empty($this->orderItems)) {
+            throw new \InvalidArgumentException('No items added to the order.');
+        }
+
+        return $this->orderRepository->finalizeOrder($this->orderUserId, $this->orderItems);
     }
 
     public function getAllOrders()
