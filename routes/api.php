@@ -6,6 +6,7 @@ use App\Helpers\ResponseHandler;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,3 +59,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 //-----------------------------------
 Route::middleware('auth:sanctum')->get('/products', [ProductController::class, 'index']);
 
+
+// Place Order - User
+//-----------------------------------
+Route::middleware('auth:sanctum')->post('/order', [OrderController::class, 'placeOrder']);
