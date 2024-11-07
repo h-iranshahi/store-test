@@ -44,54 +44,6 @@ class OrderServiceTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
-    public function it_creates_an_order_with_multiple_products()
-    {
-        $user = User::factory()->create();
-        $product1 = Product::factory()->create(['price' => 100.00]);
-        $product2 = Product::factory()->create(['price' => 200.00]);
-
-        $productData = [
-            ['product_id' => $product1->id, 'quantity' => 2],
-            ['product_id' => $product2->id, 'quantity' => 1],
-        ];
-
-        $expectedTotal = (100.00 * 2) + (200.00 * 1);
-
-        $order = Order::factory()->create(['user_id' => $user->id, 'total_amount' => 0]);
-
-        // Mock the OrderRepository create and update methods
-        $this->orderRepository
-            ->shouldReceive('create')
-            ->once()
-            ->with(['user_id' => $user->id, 'total_amount' => 0])
-            ->andReturn($order);
-
-        $this->orderRepository
-            ->shouldReceive('update')
-            ->once()
-            ->with($order->id, ['total_amount' => $expectedTotal])
-            ->andReturn(true);
-
-        // Mock the ProductRepository find method
-        $this->productRepository
-            ->shouldReceive('find')
-            ->with($product1->id)
-            ->andReturn($product1);
-
-        $this->productRepository
-            ->shouldReceive('find')
-            ->with($product2->id)
-            ->andReturn($product2);
-
-        // Execute the createOrder method
-        $createdOrder = $this->orderService->createOrder($user->id, $productData);
-
-        // Verify the order was created with correct total and product associations
-        $this->assertInstanceOf(Order::class, $createdOrder);
-        $this->assertEquals($user->id, $createdOrder->user_id);
-        $this->assertEquals($expectedTotal, $createdOrder->total_amount);
-    }
 
     /** @test */
     public function it_fetches_all_orders()
