@@ -71,4 +71,13 @@ class OrderController extends Controller
 
         }
     }
+
+    public function orderHistory(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $orders = $this->orderService->getOrderHistory($user->id, $request->query('page', 1), $request->query('per_page', 10));
+
+        return ResponseHandler::success('Order history fetched successfully', $orders);
+    }
+
 }

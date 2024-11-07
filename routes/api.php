@@ -19,6 +19,9 @@ use App\Http\Controllers\OrderController;
 |
 */
 
+
+// Authentication
+//-----------------------------------
 Route::prefix('auth')->group(function () {
     // Registration Route
     Route::post('register', [AuthController::class, 'register']);
@@ -37,6 +40,8 @@ Route::prefix('auth')->group(function () {
 });
 
 
+// Roles
+//-----------------------------------
 Route::middleware(['auth:sanctum', 'role:admin'])->get('/admin/dashboard', function () {
     return ResponseHandler::success('Welcome Admin');
 });
@@ -46,8 +51,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-
-// Product Management - Admin
+// Products - Admin
 //-----------------------------------
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/admin/products', [AdminProductController::class, 'create']); 
@@ -55,11 +59,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::delete('/admin/products/{id}', [AdminProductController::class, 'destroy']); 
 });
 
-// Product Management - User
+
+// Products - User
 //-----------------------------------
 Route::middleware('auth:sanctum')->get('/products', [ProductController::class, 'index']);
 
 
-// Place Order - User
+// Orders - User
 //-----------------------------------
 Route::middleware('auth:sanctum')->post('/order', [OrderController::class, 'placeOrder']);
+Route::middleware('auth:sanctum')->get('/orders/history', [OrderController::class, 'orderHistory']);

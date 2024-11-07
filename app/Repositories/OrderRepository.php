@@ -70,4 +70,14 @@ class OrderRepository
             throw new \Exception('Error finalizing order: ' . $e->getMessage());
         }
     }
+
+    public function getOrdersByUserId(int $userId, int $page = 1, int $perPage = 10)
+    {
+        $orders = Order::where('user_id', $userId)
+                       ->with('items')  
+                       ->paginate($perPage, ['*'], 'page', $page);
+
+        return $orders;
+    }
+
 }

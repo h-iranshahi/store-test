@@ -22,7 +22,6 @@ class OrderService
 
     }
 
-
     public function startOrder($user)
     {
         $this->orderUserId = $user->id;
@@ -63,6 +62,21 @@ class OrderService
         }
 
         return $this->orderRepository->finalizeOrder($this->orderUserId, $this->orderItems);
+    }
+
+    public function getOrderHistory(int $userId, int $page = 1, int $perPage = 10): array
+    {
+        $orders = $this->orderRepository->getOrdersByUserId($userId, $page, $perPage);
+
+        return [
+            'list' => $orders->items(),
+            'pagination' => [
+                'total' => $orders->total(),
+                'per_page' => $orders->perPage(),
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+            ],
+        ];
     }
 
     public function getAllOrders()
