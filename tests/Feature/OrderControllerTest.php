@@ -64,4 +64,48 @@ class OrderControllerTest extends TestCase
             'total_amount' => $expectedTotalAmount,
         ]);
     }
+
+
+    public function test_user_can_view_order_history()
+    {
+        $user = User::factory()->create();
+        Order::factory()->count(5)->for($user)->create();
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->getJson('/api/orders/history');
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'list' => [
+                        '*' => [
+                            'id',
+                            'total_amount',
+                            'status',
+                            'created_at',
+                            'updated_at',
+                            'items' => [
+                                '*' => [
+                                    'product_id',
+                                    'quantity',
+                                    'price',
+                                ],
+                            ],
+                        ],
+                    ],
+                    'pagination' => [
+                        'total',
+                        'per_page',
+                        'current_page',
+                        'last_page',
+                    ],
+                ],
+            ]);
+
+        $response->assertJsonCount(5, 'data.list');
+
+    }
+
 }
