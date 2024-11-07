@@ -1,5 +1,5 @@
 <?php
-namespace Tests\Feature;
+namespace Tests\Feature\Services;
 
 use App\Models\Order;
 use App\Models\Product;
