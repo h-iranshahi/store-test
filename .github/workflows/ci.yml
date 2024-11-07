@@ -1,0 +1,53 @@
+name: Laravel CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: mydb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpassword
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP 8.1
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, pdo_mysql
+
+      - name: Install dependencies
+        run: |
+          composer install
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Configure Laravel Environment
+        run: |
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_DATABASE=laravel/DB_DATABASE=mydb/' .env
+          sed -i 's/DB_USERNAME=root/DB_USERNAME=testuser/' .env
+          sed -i 's/DB_PASSWORD=/DB_PASSWORD=testpassword/' .env
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Run Tests
+        run: php artisan test
