@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Helpers\ResponseHandler;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,4 +44,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
- 
+
+// Admin Module - Product Management
+//-----------------------------------
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::post('/admin/products', [ProductController::class, 'create']); // Create product
+    Route::put('/admin/products/{id}', [ProductController::class, 'update']); // Update product
+    Route::delete('/admin/products/{id}', [ProductController::class, 'destroy']); // Delete product
+});
