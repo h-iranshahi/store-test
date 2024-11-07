@@ -33,6 +33,11 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+
+Route::middleware(['auth:sanctum', 'role:admin'])->get('/admin/dashboard', function () {
+    return ResponseHandler::success('Welcome Admin');
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return ResponseHandler::success('Authenticated user info', $request->user()->toArray());
 });
