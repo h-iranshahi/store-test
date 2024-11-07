@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Helpers\ResponseHandler;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +16,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('auth')->group(function () {
+    // Registration Route
+    Route::post('register', [AuthController::class, 'register']);
+    
+    // Login Route
+    Route::post('login', [AuthController::class, 'login']);
+    
+    // Protected routes that require authentication
+    Route::middleware('auth:sanctum')->group(function () {
+        // Current Authenticated User Info
+        Route::get('me', [AuthController::class, 'me']);
+        
+        // Logout
+        Route::post('logout', [AuthController::class, 'logout']);
+    });
 });
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return ResponseHandler::success('Authenticated user info', $request->user()->toArray());
+});
+
+
+ 
